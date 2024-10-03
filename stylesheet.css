@@ -3,3 +3,17 @@
     font-weight: bold;
     padding: 10px;
 }
+
+.start-button, .add-task-button {
+    margin: 5px;
+}
+
+.task-input {
+    width: 200px;
+    padding: 5px;
+}
+
+.task-label {
+    font-size: 14px;
+    margin: 5px;
+}
