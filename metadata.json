@@ -1,0 +1,8 @@
+{
+    "uuid": "pomodoro-eisenhower@gilfoyle_v2",
+    "name": "Pomodoro + Eisenhower Matrix",
+    "description": "Combines the Pomodoro Technique with the Eisenhower Matrix for task management.",
+    "version": 1.0,
+    "shell-version": ["46"],  
+    "url": "https://utkarsh-maurya.netlify.app"  
+}
