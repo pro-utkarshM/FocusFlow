@@ -1,3 +1,7 @@
+.main-layout {
+    padding: 10px;
+}
+
 .pomodoro-label {
     font-size: 18px;
     font-weight: bold;

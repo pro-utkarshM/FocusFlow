@@ -1,35 +1,45 @@
-const { GObject, St, Clutter, Gio, GLib } = imports.gi;
+const { GObject, St, Clutter, Gio, GLib, Notify } = imports.gi;
 const Main = imports.ui.main;
-const Panel = imports.ui.panel;
 
 var PomodoroEisenhower = GObject.registerClass(
 class PomodoroEisenhower extends GObject.Object {
     _init() {
-        this.actor = new St.BoxLayout({ vertical: true });
+        this.actor = new St.BoxLayout({ vertical: true, style_class: "main-layout" });
+        
+        // Create timer label
         this.timerLabel = new St.Label({ text: "Pomodoro Timer", style_class: "pomodoro-label" });
         this.actor.add_child(this.timerLabel);
 
+        // Create start button
         this.startButton = new St.Button({ label: "Start Pomodoro", style_class: "start-button" });
         this.startButton.connect('clicked', () => this.startPomodoro());
         this.actor.add_child(this.startButton);
 
+        // Task list and input
         this.taskList = [];
         this.currentTaskIndex = 0;
-
+        this.completedTasks = [];
         this._createTaskInput();
 
+        // Add to panel
         Main.panel.addToStatusArea('pomodoro-eisenhower', this.actor);
+        
+        // Initialize notifications
+        Notify.init("Pomodoro + Eisenhower Matrix");
     }
 
     _createTaskInput() {
+        // Task input
         this.taskInput = new St.Entry({ hint_text: "Add a task...", style_class: "task-input" });
         this.actor.add_child(this.taskInput);
 
+        // Add task button
         this.addTaskButton = new St.Button({ label: "Add Task", style_class: "add-task-button" });
         this.addTaskButton.connect('clicked', () => this.addTask());
         this.actor.add_child(this.addTaskButton);
 
-        this.taskLabel = new St.Label({ text: "Tasks:", style_class: "task-label" });
+        // Task label to display tasks
+        this.taskLabel = new St.Label({ text: "Tasks: None", style_class: "task-label" });
         this.actor.add_child(this.taskLabel);
     }
 
@@ -38,7 +48,7 @@ class PomodoroEisenhower extends GObject.Object {
         if (task) {
             this.taskList.push(task);
             this.taskLabel.set_text(`Tasks: ${this.taskList.join(', ')}`);
-            this.taskInput.set_text('');
+            this.taskInput.set_text(''); // Clear input
         }
     }
 
@@ -69,11 +79,27 @@ class PomodoroEisenhower extends GObject.Object {
     }
 
     _pomodoroComplete() {
+        // Notify the user that the Pomodoro session is complete
         this.timerLabel.set_text("Pomodoro Complete! Take a break.");
+        this._notify("Pomodoro Complete", `You completed the task: ${this.taskList[this.currentTaskIndex]}`);
+        this.completedTasks.push(this.taskList[this.currentTaskIndex]);
         this.currentTaskIndex++;
+
+        // Clear task list if all tasks are completed
+        if (this.currentTaskIndex >= this.taskList.length) {
+            this.taskLabel.set_text("All tasks completed!");
+        } else {
+            this.timerLabel.set_text(`Working on: ${this.taskList[this.currentTaskIndex]}`);
+        }
+
         if (this.timeoutId) {
             GLib.Source.remove(this.timeoutId);
         }
+    }
+
+    _notify(title, message) {
+        const notification = new Notify.Notification.new(title, message);
+        notification.show();
     }
 });
 
